@@ -451,13 +451,13 @@ cryoRayshader <- function(path,projecIn,modVersion){
       png(paste(path.output,'\\',outputNames[i],"_graph.png",sep=''), width=nrow(DEM_glac), height=ncol(DEM_glac), res = 100)
       par(mar = c(2,4,2,2), xaxs = "i", yaxs = "i") #Parameters to create a borderless image
       if(feature_Viz == 'totalarea'){
-        matplot(seq(1,length(feature_all),1),featureTimeLine ,type='b',lty= 1,lwd = 2, pch=18,ylim=c(0,round(featureTimeLine[1,1]) * 2),col=colsMat,xlab = '',ylab = 'total area [m2]', xaxt="n",main=paste(glacName,outputNames[i]))
+        matplot(seq(1,length(feature_all),1),featureTimeLine ,type='b',lty= 1,lwd = 2, pch=18,ylim=c(0,round(featureTimeLine[1,1]) * 3),col=colsMat,xlab = '',ylab = 'total area [m2]', xaxt="n",main=paste(glacName,outputNames[i]))
       }
       if(feature_Viz == 'count'){
-        matplot(seq(1,length(feature_all),1),featureTimeLine ,type='b',lty= 1,lwd = 2, pch=18,ylim=c(0,round(featureTimeLine[1,1]) * 2),col=colsMat,xlab = '',ylab = 'count [-]', xaxt="n",main=paste(glacName,outputNames[i]))
+        matplot(seq(1,length(feature_all),1),featureTimeLine ,type='b',lty= 1,lwd = 2, pch=18,ylim=c(0,round(featureTimeLine[1,1]) * 3),col=colsMat,xlab = '',ylab = 'count [-]', xaxt="n",main=paste(glacName,outputNames[i]))
       }
       if(feature_Viz == 'meanarea'){
-        matplot(seq(1,length(feature_all),1),featureTimeLine ,type='b',lty= 1,lwd = 2, pch=18,ylim=c(0,round(featureTimeLine[1,1]) * 2),col=colsMat,xlab = '',ylab = 'mean area [m2]', xaxt="n",main=paste(glacName,outputNames[i]))
+        matplot(seq(1,length(feature_all),1),featureTimeLine ,type='b',lty= 1,lwd = 2, pch=18,ylim=c(0,round(featureTimeLine[1,1]) * 3),col=colsMat,xlab = '',ylab = 'mean area [m2]', xaxt="n",main=paste(glacName,outputNames[i]))
       } 
       axis(side=1, at=seq(1,length(feature_all),1), labels = outputNames)
       grid(NULL,NULL)
