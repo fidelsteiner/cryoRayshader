@@ -1,6 +1,6 @@
 # cryoRayshader
 
-The code enables users to visualize spatial data in the cryosphere in 3D animations, including a model of the glacier as well as graphical data visualization.
+The code enables users to visualize spatial data in the cryosphere in 3D animations, including a model of the glacier as well as graphical data visualization. The code is based on the original Rayshader (https://github.com/tylermorganwall/rayshader).
 Necessary input data is a DEM of the area, spatial data of the glacier surface changing in time (e.g. data retrieved from satellites or models) and data to visualize on top including glacier velocities, surface features like lakes etc.
 
 Note that distributed glacier thickness data exists for all glaciers globally (consult: https://www.glims.org/RGI/rgi60_dl.html). 
