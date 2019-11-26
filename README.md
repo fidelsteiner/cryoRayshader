@@ -13,5 +13,5 @@ We use data from our research studies to show examples of how the model can be u
 # Visualize changing pond cover on a debris-covered glacier
 We use pond outlines from Steiner et al. (2019) (data available https://doi.pangaea.de/10.1594/PANGAEA.899171) to show the change of water surfaces on a debris-covered glacier in the Himalaya.
 
-![](https://github.com/fidelsteiner/cryoRayshader/exampleViz/ponds_example.gif)
+![](https://github.com/fidelsteiner/cryoRayshader/blob/master/exampleViz/ponds_example.gif)
 
