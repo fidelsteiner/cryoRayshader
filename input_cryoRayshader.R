@@ -8,6 +8,9 @@
 # Necessary input data is a DEM of the area, spatial data of the glacier surface changing in time (e.g. data retrieved from satellites or models) and data to visualize on top
 # including glacier velocities, surface features like lakes etc.
 # 
+# Outlines of glaciers need to be supplied as .shp files. They can be downloaded for all glaciers at the RGI (https://www.glims.org/RGI/rgi60_dl.html).
+#
+#
 # Note that distributed glacier thickness data exists for all glaciers globally (consult: https://www.glims.org/RGI/rgi60_dl.html). 
 # Velocity datasets also become more and more accesible (see for example https://nsidc.org/data/golive/)
 #
@@ -52,30 +55,31 @@ library(pracma)
 ######### 
 # specify path of the cryoRayshader function
 ######### 
-source("F:\\PhD\\cryoRayshader\\cryoRayshader.R")
+source("...\\cryoRayshader.R")
 #########
 
 ######### 
 # specify paths for all input data
 ######### 
 # *** required paths for all model versions
-path.DEM <- 'F:\\PhD\\MSc_Projects\\GuidedResearch\\FinalReport\\3DglacierRayshader\\Data\\Langtang\\DEM\\langtang_solarDEM.tif'            # DEM of study region (.tif file)
-path.ortho <- 'F:\\PhD\\MSc_Projects\\GuidedResearch\\FinalReport\\3DglacierRayshader\\Data\\Langtang\\Satelliteimages\\3m_resolution.tif'  # stallite imagery for visualization (.tif file; RGB three band image)
-path.catchoutline <- 'F:\\PhD\\MSc_Projects\\GuidedResearch\\FinalReport\\3DglacierRayshader\\Data\\Langtang\\Outlines\\catch_proj_1.shp'   # outline of study region (.shp file)
-path.glacoutline <- 'F:\\PhD\\MSc_Projects\\GuidedResearch\\FinalReport\\3DglacierRayshader\\Data\\Langtang\\Outlines\\Langtang_2015.shp'   # outline of glacier (.shp file)
-path.thickness <- 'F:\\PhD\\MSc_Projects\\GuidedResearch\\FinalReport\\3DglacierRayshader\\Data\\Langtang\\Icethickness'                    # folder that contains all rasters (.tif) with ice thickness data (chronological order)
-path.output <- 'F:\\PhD\\MSc_Projects\\GuidedResearch\\cryoRayshader\\allCode\\output'                                                      # folder for final figures
+path.DEM <- '...DEM.tif'                # DEM of study region (.tif file)
+path.ortho <- '...ortho.tif'            # satellite imagery for visualization (.tif file; RGB three band image)
+
+path.glacoutline <- '...shp'            # outline of glacier (.shp file)
+path.thickness <- '...\\Icethickness'   # folder that contains all rasters (.tif) with glacier thickness (chronological order)
+path.output <- '...\\output'            # folder for final figures
 
 # * paths only required for some model versions
-path.velocity <- 'F:\\PhD\\MSc_Projects\\GuidedResearch\\Data\\Langtang\\Velocity'                                                          # folder that contains all rasters (.tif) with glacier velocities (chronological order)
-path.features <- 'F:\\PhD\\MSc_Projects\\GuidedResearch\\FinalReport\\3DglacierRayshader\\Data\\Langtang\\Features\\ponds'                  # folder that contains all features (e.g. lakes) as .shp files (chronological order)
+path.velocity <- '...\\Velocity'        # folder that contains all rasters (.tif) with glacier velocities (chronological order)
+path.features <- '...'                  # folder that contains all features (e.g. lakes) as .shp files (chronological order)
 
-projecIn <- '+proj=utm +zone=45N +datum=WGS84'        # projection (UTM, default: '+proj=utm +zone=45N +datum=WGS84')
+projec <<- '+proj=utm +zone=45N +datum=WGS84'        # projection (UTM, default: '+proj=utm +zone=XXN +datum=WGS84')
 
 freeCores <- 0                                        # in case model is performed on multiple cores, choose how many of your computer's cores you want to keep open
 
 ######### 
 # specify 3D Visualization Parameters (also see plot_3D() in https://cran.r-project.org/web/packages/rayshader/rayshader.pdf)
+# this depends on the local topography and orientation of the glacier, so likely will need a couple of runs to be optimized
 ######### 
 zscale <<- 30   # ratio between x/y and z spacing. Starting value the resolution of the DEM raster
 fov <<- 0       # field of view angle 
@@ -93,18 +97,21 @@ colemph <<- 1   # set 1 to emphasize area of mass loss with grey colour/shaded
 # (d) visualize features on the glacier surface ('features')
 
 # *** required for all model versions
-modVersion <- 'velocities'
-currentYear <<- 5                                                   # number of glacier thickness data that represents the same year as the catchment DEM (to create DEM without ice)
-outputNames <<- c('1974','2006','2009','2010','2014','2015','2016') # output names for the individual timesteps, has to correspond with time steps of input data
-glacName <<- 'Langtang'                                             # Glacier Name for image titles
+modVersion <- 'massLoss'
+currentYear <<- 18                                                  # number of glacier thickness data that represents the same year as the catchment DEM (to create DEM without ice)
+outputNames <<- c('1974','2006',...)                                # output names for the individual timesteps, has to correspond with time steps of input data
+glacName <<- 'Hintereis'                                            # Glacier Name for image titles
 spatialRasterViz <<- 1                                              # set to 1 will project the spatial data to the glacier surface (currently only works for 'velocities')
-elevBands <<- c(4500,4800,5000,5350)                                # Choose cutoff elevations for elevation bands, necessary for 'massLossData' and 'velocities' (at least 1 number, has to lie within the glacier elevation range)
-finalFileName <<- 'meanAreaPonds'
+elevBands <<- c(4500,4800,...)                                      # Choose cutoff elevations for elevation bands, necessary for 'massLossData' and 'velocities' (at least 2 numbers, has to lie within the glacier elevation range)
+finalFileName <<- 'outputGIF'
 
 # *** required only for 'features' model
-feature_Viz <- 'meanarea'                                           # visualize area of individual features ('meanarea'), total area of all features ('totalarea') or just number of features ('count')
+feature_Viz <- 'totalarea'                                           # visualize area of individual features ('meanarea'), total area of all features ('totalarea') or just number of features ('count')
 
 #########
 # Run Model
 #########
-cryoRayshader(path,projecIn,modVersion)
+# To not mix the 3D animation up with previous files, make sure that your output directory is empty
+file.remove(list.files(path.output,pattern = ".png",full.names = T))
+
+cryoRayshader(path,modVersion)

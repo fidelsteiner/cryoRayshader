@@ -13,38 +13,28 @@
 # Vening Meinesz building, room 4.30 | P.O. Box 80.115, 3508 TC Utrecht | j.f.steiner@uu.nl | www.uu.nl/staff/jfsteiner | www.mountainhydrology.org 
 ################################################################################
 
-cryoRayshader <- function(path,projecIn,modVersion){
+cryoRayshader <- function(path,modVersion){
  
   ###########################
   # load all necessary data
   ###########################
   DEM <- raster(path.DEM)
+  DEM <- projectRaster(DEM,crs=projec)
   ortho_image <- brick(path.ortho)
-  catchment_outline <- path.catchoutline
   glacier_outline <- path.glacoutline
-  
-  #projection
-  projec <- projecIn
   
   # adding the glacier outline
   ogrInfo(glacier_outline)
   glacier_mask <- readOGR(dsn = glacier_outline)
   glacier_mask <- spTransform(glacier_mask, projec) # Transformation of shp files
-  # adding the catchment outline
-  ogrInfo(catchment_outline)
-  catch_outline <- readOGR(dsn = catchment_outline)
-  catch_outline <- spTransform(catch_outline, projec) # Transformation of shp files
   
-  #cropping the rasters to the glacier and catchment extent
+  #cropping the rasters to the glacier extent
   DEM_glac <- crop(DEM,glacier_mask)
-  DEM_catch <- crop(DEM,catch_outline)
   sat_glac <- crop(ortho_image,glacier_mask)
-  sat_catch <- crop(ortho_image,catch_outline)
   
   # Resampling of ortho imagery
-  sat_catch_resampled <- resample(sat_catch,DEM_catch, method='bilinear')
   sat_glac_resampled <- resample(sat_glac,DEM_glac, method='bilinear')
-  sat_glac_resampled_base <- resample(sat_glac,DEM_glac, method='bilinear')
+  sat_glac_resampled_base <- sat_glac_resampled
 
   # Model Cores
   
@@ -64,7 +54,6 @@ cryoRayshader <- function(path,projecIn,modVersion){
     
       multiCoreFunc <- function(i){
       glacierthickness <- raster(ice_thickness_all[i])
-      #glacierthickness[DEM<elevation_band|DEM>elevation_band] <- NA #defining elevation bands
       glacierthickness <- crop(glacierthickness, glacier_mask)
       glacierthickness <- resample(glacierthickness,DEM_glac, method='bilinear')
       glacierthickness <- focal(glacierthickness, w=matrix(1,nc=5, nr=5),fun=mean)
@@ -102,7 +91,7 @@ cryoRayshader <- function(path,projecIn,modVersion){
         add_overlay(terrain_image, alphalayer = 0.9) %>%
         add_shadow(ray_shade(elmat, anglebreaks = seq(60, 90), sunangle = 270, multicore = TRUE, lambert = FALSE, remove_edges = FALSE)) %>%
         add_shadow(ambient_shade(elmat, multicore = TRUE, remove_edges = FALSE)) %>%
-        plot_3d(elmat, zscale = zscale, fov = fov,theta = theta, zoom = zoom3D, phi = 45, windowsize = c(nrow(DEM_glac) * 2,ncol(DEM_glac) * 2), solid = T)
+        plot_3d(elmat, zscale = zscale, fov = fov,theta = theta, zoom = zoom3D, phi = 35, windowsize = c(nrow(DEM_glac) * 2,ncol(DEM_glac) * 2), solid = T)
       
       render_snapshot(paste(path.output,'\\',outputNames[i],".png",sep='')) #saving the 3d model in png format
     }
