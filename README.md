@@ -14,7 +14,9 @@ Visualize modelled mass loss over a clean ice and a debris-covered glacier
 ------
 Model outputs from [Wijngaard et al. (2019)](https://www.frontiersin.org/articles/10.3389/feart.2019.00143/full) (data available on request) allows us to visualize change in space. We do that below for a clean ice (Hintereis, European Alps) and debris-covered glacier (Langtang, Himalaya).
 
+Simple mass loss data is visualized with orthophotos draped on top and the extent of the respective ice cover enhanced.
 
+![](https://github.com/fidelsteiner/cryoRayshader/blob/master/exampleViz/double_example.gif)
 
 Visualize changing pond cover on a debris-covered glacier
 ------
