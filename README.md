@@ -18,9 +18,23 @@ Simple mass loss data is visualized with orthophotos draped on top and the exten
 
 ![](https://github.com/fidelsteiner/cryoRayshader/blob/master/exampleViz/double_example.gif)
 
+Visualize modelled mass loss and associated data
+------
+In combination with the 3D visualization the data can be visualized alongside as a graph.
+
+![](https://github.com/fidelsteiner/cryoRayshader/blob/master/exampleViz/massLossLangtangdata_example.gif)
+
+Additionally spatial data like mass loss or velocities can be draped over the glacier surface.
+
+![](https://github.com/fidelsteiner/cryoRayshader/blob/master/exampleViz/velocityLangtangdata_example.gif)
+
 Visualize changing pond cover on a debris-covered glacier
 ------
 We use pond outlines from [Steiner et al. (2019)](https://www.cambridge.org/core/journals/journal-of-glaciology/article/supraglacial-ice-cliffs-and-ponds-on-debriscovered-glaciers-spatiotemporal-distribution-and-characteristics/BEE84C3FF7F8BE25709171E8AE3BED5A) (data available https://doi.pangaea.de/10.1594/PANGAEA.899171) to show the change of water surfaces on a debris-covered glacier in the Himalaya.
 
+Options include showing the numbers of features ...
 ![](https://github.com/fidelsteiner/cryoRayshader/blob/master/exampleViz/ponds_example.gif)
 
+as well as the total and average area covered by the features ...
+
+![](https://github.com/fidelsteiner/cryoRayshader/blob/master/exampleViz/ponds_example2.gif)
