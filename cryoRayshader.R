@@ -31,9 +31,9 @@ cryoRayshader <- function(path,modVersion){
   #cropping the rasters to the glacier extent
   DEM_glac <- crop(DEM,glacier_mask)
   sat_glac <- crop(ortho_image,glacier_mask)
-  
+
   # Resampling of ortho imagery
-  sat_glac_resampled <- resample(sat_glac,DEM_glac, method='bilinear')
+  sat_glac_resampled <- raster::resample(sat_glac,DEM_glac, method='bilinear')
   sat_glac_resampled_base <- sat_glac_resampled
 
   # Model Cores
@@ -48,14 +48,14 @@ cryoRayshader <- function(path,modVersion){
     # creating an ice free surface
     latest_thickness <- raster(ice_thickness_all[currentYear])
     latest_thickness <- crop(latest_thickness, glacier_mask)
-    latest_thickness <- resample(latest_thickness,DEM_glac, method='bilinear')
+    latest_thickness <- raster::resample(latest_thickness,DEM_glac, method='bilinear')
     latest_thickness[is.na(latest_thickness)] <- 0
     actual_surface <- DEM_glac - latest_thickness
     
       multiCoreFunc <- function(i){
       glacierthickness <- raster(ice_thickness_all[i])
       glacierthickness <- crop(glacierthickness, glacier_mask)
-      glacierthickness <- resample(glacierthickness,DEM_glac, method='bilinear')
+      glacierthickness <- raster::resample(glacierthickness,DEM_glac, method='bilinear')
       glacierthickness <- focal(glacierthickness, w=matrix(1,nc=5, nr=5),fun=mean)
       glacierthickness[is.na(glacierthickness)] <- 0
       surfaceDEM <- actual_surface + glacierthickness
@@ -134,7 +134,7 @@ cryoRayshader <- function(path,modVersion){
   # creating an ice free surface
   latest_thickness <- raster(ice_thickness_all[currentYear])
   latest_thickness <- crop(latest_thickness, glacier_mask)
-  latest_thickness <- resample(latest_thickness,DEM_glac, method='bilinear')
+  latest_thickness <- raster::resample(latest_thickness,DEM_glac, method='bilinear')
   latest_thickness[is.na(latest_thickness)] <- 0
   actual_surface <- DEM_glac - latest_thickness
   
@@ -153,7 +153,7 @@ cryoRayshader <- function(path,modVersion){
     for(eC in 1: elevCuts){
       thick <- raster(ice_thickness_all[i])
       thick <- crop(thick, glacier_mask)
-      thick <- resample(thick,DEM_glac, method='bilinear')
+      thick <- raster::resample(thick,DEM_glac, method='bilinear')
       thick <- focal(thick, w=matrix(1,nc=5, nr=5),fun=mean)
       thick[DEM_glac<=elevBands[eC]|DEM_glac>elevBands[eC + 1]] <- NA
       thick[is.na(thick)] <- 0
@@ -162,28 +162,45 @@ cryoRayshader <- function(path,modVersion){
     if(i>1){
       rgl::clear3d()
     }
-  
+
+
+    if(spatialRasterViz != 1){
     shadeCol <- as.vector(col2rgb(colsMat[eC+1]))
     sat_glac_resampled [[1]][which(thick[] > 50)] <- shadeCol[1]
     sat_glac_resampled [[2]][which(thick[] > 50)] <- shadeCol[2]
     sat_glac_resampled [[3]][which(thick[] > 50)] <- shadeCol[3]
     }
+    }
     
     thickAllBands <- raster(ice_thickness_all[i])
     thickAllBands <- crop(thickAllBands, glacier_mask)
-    thickAllBands <- resample(thickAllBands,DEM_glac, method='bilinear')
+    thickAllBands <- raster::resample(thickAllBands,DEM_glac, method='bilinear')
     thickAllBands <- focal(thickAllBands, w=matrix(1,nc=5, nr=5),fun=mean)
+    thickAllBands2 <- thickAllBands
     thickAllBands[is.na(thickAllBands)] <- 0
     
-    plotRGB(sat_glac_resampled, stretch="lin")
-    dev.off()
     
     if(i == 1){
       initialheight <- thickBrick[[2:length(elevBands)]]
+      initialheight2 <- initialheight
       initialheight[initialheight<10] <- NA
     }
     actualheight <- thickBrick[[2:length(elevBands)]]
+    actualheight2 <- actualheight
     actualheight[actualheight<10] <- NA
+    
+    dH <- calc(actualheight2 - initialheight2,sum,na.rm=T)
+    
+    if(spatialRasterViz == 1){
+      shadeCol <- as.vector(col2rgb(colsMat[length(elevBands)]))
+      sat_glac_resampled[[1]][which(thickAllBands2[] > 50)] <- 255 - abs(dH[which(thickAllBands2[] > 50)]/max(dH[which(thickAllBands2[] > 50)]))*shadeCol[1]
+      sat_glac_resampled[[2]][which(thickAllBands2[] > 50)] <- 255 - abs(dH[which(thickAllBands2[] > 50)]/max(dH[which(thickAllBands2[] > 50)]))*shadeCol[2]
+      sat_glac_resampled[[3]][which(thickAllBands2[] > 50)] <- 255 - abs(dH[which(thickAllBands2[] > 50)]/max(dH[which(thickAllBands2[] > 50)]))*shadeCol[3]
+      
+    }
+    
+    plotRGB(sat_glac_resampled, stretch="lin")
+    dev.off()
     
     massLossTimeLine[i,2:4] <- 100 - cellStats(initialheight - actualheight,sum)/cellStats(initialheight,sum)*100
     massLossTimeLine[i,1] <- 100 - sum(cellStats(initialheight - actualheight,sum))/sum(cellStats(initialheight,sum))*100    
@@ -192,6 +209,8 @@ cryoRayshader <- function(path,modVersion){
     par(mar = c(2,4,2,2), xaxs = "i", yaxs = "i") #Parameters to create a borderless image
     matplot(seq(1,length(ice_thickness_all),1),massLossTimeLine,type='b',lty= 1,lwd = 2, pch=18,ylim=c(50,120),col=colsMat,xlab = '',ylab = 'ice thickness [%]', xaxt="n",main=paste(glacName,outputNames[i]))
     axis(side=1, at=seq(1,length(ice_thickness_all),1), labels = outputNames)
+    if(spatialRasterViz == 1){
+      legend('topright',c('mean',paste('below',elevBands[2:length(elevBands)],'m')),lty= 1,lwd = 2, pch=18,col=colsMat,bty='n')}
     grid(NULL,NULL)
     dev.off()
     
@@ -249,7 +268,7 @@ cryoRayshader <- function(path,modVersion){
     # creating an ice free surface
     latest_thickness <- raster(ice_thickness_all[currentYear])
     latest_thickness <- crop(latest_thickness, glacier_mask)
-    latest_thickness <- resample(latest_thickness,DEM_glac, method='bilinear')
+    latest_thickness <- raster::resample(latest_thickness,DEM_glac, method='bilinear')
     latest_thickness[is.na(latest_thickness)] <- 0
     actual_surface <- DEM_glac - latest_thickness
     
@@ -269,7 +288,7 @@ cryoRayshader <- function(path,modVersion){
       for(eC in 1: elevCuts){
         velSet <- raster(vel_all[i])
         velSet <- crop(velSet, glacier_mask)
-        velSet <- resample(velSet,DEM_glac, method='bilinear')
+        velSet <- raster::resample(velSet,DEM_glac, method='bilinear')
         velSet <- focal(velSet, w=matrix(1,nc=5, nr=5),fun=mean)
         velSet[DEM_glac<=elevBands[eC]|DEM_glac>elevBands[eC + 1]] <- NA
         velSet[velSet[]==0] <- NA
@@ -288,15 +307,15 @@ cryoRayshader <- function(path,modVersion){
       
       velAllBands <- raster(vel_all[i])
       velAllBands <- crop(velAllBands, glacier_mask)
-      velAllBands <- resample(velAllBands,DEM_glac, method='bilinear')
+      velAllBands <- raster::resample(velAllBands,DEM_glac, method='bilinear')
       velAllBands <- focal(velAllBands, w=matrix(1,nc=5, nr=5),fun=mean)
       velAllBands[velAllBands[]==0] <- NA
       if(spatialRasterViz == 1){
       shadeCol <- as.vector(col2rgb(colsMat[length(elevBands)]))
       
-      sat_glac_resampled [[1]][which(velAllBands[] > 0)] <- velAllBands[which(velAllBands[] > 0)]/100*shadeCol[1]
-      sat_glac_resampled [[2]][which(velAllBands[] > 0)] <- velAllBands[which(velAllBands[] > 0)]/100*shadeCol[2]
-      sat_glac_resampled [[3]][which(velAllBands[] > 0)] <- velAllBands[which(velAllBands[] > 0)]/100*shadeCol[3]
+      sat_glac_resampled [[1]][which(velAllBands[] > 0)] <- 255-velAllBands[which(velAllBands[] > 0)]/max(velAllBands[which(velAllBands[] > 0)])*shadeCol[1]
+      sat_glac_resampled [[2]][which(velAllBands[] > 0)] <- 255-velAllBands[which(velAllBands[] > 0)]/max(velAllBands[which(velAllBands[] > 0)])*shadeCol[2]
+      sat_glac_resampled [[3]][which(velAllBands[] > 0)] <- 255-velAllBands[which(velAllBands[] > 0)]/max(velAllBands[which(velAllBands[] > 0)])*shadeCol[3]
       
       }
       
@@ -305,7 +324,7 @@ cryoRayshader <- function(path,modVersion){
       
       thickAllBands <- raster(ice_thickness_all[i])
       thickAllBands <- crop(thickAllBands, glacier_mask)
-      thickAllBands <- resample(thickAllBands,DEM_glac, method='bilinear')
+      thickAllBands <- raster::resample(thickAllBands,DEM_glac, method='bilinear')
       thickAllBands <- focal(thickAllBands, w=matrix(1,nc=5, nr=5),fun=mean)
       thickAllBands[is.na(thickAllBands)] <- 0
     
@@ -351,7 +370,7 @@ cryoRayshader <- function(path,modVersion){
     }
     
     pngList <- list.files(path=paste(path.output,"\\",sep=""),pattern='_2Figs.png',full.names = T)
-    magick::image_write_gif(magick::image_read(pngList), 
+    magick::image_write_gif(magick::image_read(pngList[2:length(pngList)]), 
                             path = paste(path.output,"\\",finalFileName,".gif",sep = ""), 
                             delay = 10/18)
   }
