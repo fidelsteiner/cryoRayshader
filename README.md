@@ -8,6 +8,8 @@ Velocity datasets also become more and more accesible (see for example https://n
 
 Prerequisites are a working installation of R Studio (https://rstudio.com/) as well as working packages as detailed below.
 
+The code input_cryoRayshader.R needs to be edited and run by the user, cryoRayshader.R includes the model core.
+
 We use data from our research studies to show examples of how the model can be used below.
 
 Visualize modelled mass loss over a clean ice and a debris-covered glacier
