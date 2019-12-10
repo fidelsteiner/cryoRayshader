@@ -12,6 +12,8 @@ The code input_cryoRayshader.R needs to be edited and run by the user, cryoRaysh
 
 We use data from our research studies to show examples of how the model can be used below.
 
+Please get in touch via j.f.steiner@uu.nl if you have other kinds of datasets you'd like to see work in this or there are bugs we can resolve.
+
 Visualize modelled mass loss over a clean ice and a debris-covered glacier
 ------
 Model outputs from [Wijngaard et al. (2019)](https://www.frontiersin.org/articles/10.3389/feart.2019.00143/full) (data available on request) allows us to visualize change in space. We do that below for a clean ice (Hintereis, European Alps) and debris-covered glacier (Langtang, Himalaya).
